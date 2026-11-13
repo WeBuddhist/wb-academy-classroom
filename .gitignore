@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage/
+
+# Text data is never committed. The corpus stays outside this repo: raw sources in
+# texts/sources/ and segmented output in texts/ are both local-only.
+/texts/
+
+# Project-local Postgres cluster for development.
+.pgdata/

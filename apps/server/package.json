@@ -1,0 +1,20 @@
+{
+  "name": "@wbac/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --env-file-if-exists=../../.env watch src/index.ts",
+    "start": "tsx --env-file-if-exists=../../.env src/index.ts",
+    "import": "tsx --env-file-if-exists=../../.env src/import.ts",
+    "migrate": "tsx --env-file-if-exists=../../.env src/migrate.ts",
+    "smoke": "node --env-file-if-exists=../../.env scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.4.2",
+    "@wbac/shared": "*",
+    "fastify": "^5.12.8",
+    "pg": "^8.23.1",
+    "socket.io": "^4.8.4"
+  }
+}
