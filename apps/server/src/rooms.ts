@@ -114,6 +114,16 @@ export async function setCurrentSegment(room: RoomRow, segmentId: string): Promi
   return true
 }
 
+/**
+ * End a class.
+ *
+ * Rooms are not left live indefinitely: a code that still works weeks later is one a
+ * stranger can wander into, and the teacher has no way to tell.
+ */
+export async function closeRoom(room: RoomRow): Promise<void> {
+  await query('update rooms set is_live = false, closed_at = now() where id = $1', [room.id])
+}
+
 export async function listTextSlugs(): Promise<string[]> {
   const rows = await query<{ slug: string }>('select slug from texts order by slug')
   return rows.map((row) => row.slug)

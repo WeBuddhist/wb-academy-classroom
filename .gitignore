@@ -7,9 +7,21 @@ dist/
 .DS_Store
 coverage/
 
-# Text data is never committed. The corpus stays outside this repo: raw sources in
+# No real text is ever committed. The corpus stays outside this repo: raw sources in
 # texts/sources/ and segmented output in texts/ are both local-only.
-/texts/
+#
+# `/texts/*` rather than `/texts/` matters: git does not descend into an ignored
+# directory, so the exception below would never be seen. sample.json is synthetic —
+# placeholder syllables, not corpus — and is committed so a fresh clone has something
+# to run against.
+/texts/*
+!/texts/sample.json
 
 # Project-local Postgres cluster for development.
 .pgdata/
+
+# Internal notes stay off GitHub: the design plan, and the prose runbooks at the top of
+# infra/. The deployment scripts under infra/native/ are tracked — the server gets them
+# by cloning this repository.
+/docs/
+/infra/*.md

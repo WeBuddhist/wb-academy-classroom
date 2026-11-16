@@ -1,0 +1,141 @@
+{
+  "meta": {
+    "id": "sample",
+    "slug": "sample",
+    "titleBo": "༄༅། །ཀ་ཁ་ག་གསུམ་གྱི་དཔེ་མཚོན་ཡིག་ཆ་བཞུགས་སོ། །",
+    "titleEn": "Sample text — synthetic, for development only",
+    "source": "fixture"
+  },
+  "segments": [
+    {
+      "id": "s-0001",
+      "idx": 0,
+      "kind": "title",
+      "bo": "༄༅། །ཀ་ཁ་ག་གསུམ་གྱི་དཔེ་མཚོན་ཡིག་ཆ་བཞུགས་སོ། །",
+      "breakAfter": "major",
+      "en": "A sample text in three parts."
+    },
+    {
+      "id": "s-0002",
+      "idx": 1,
+      "kind": "homage",
+      "bo": "བླ་མ་དམ་པ་རྣམས་ལ་ཕྱག་འཚལ་ལོ། །",
+      "breakAfter": "major",
+      "en": "Homage to the teachers."
+    },
+    {
+      "id": "s-0003",
+      "idx": 2,
+      "kind": "outline",
+      "bo": "འདིར་བཤད་པ་ལ་གསུམ།",
+      "breakAfter": "minor",
+      "en": "This is explained in three parts."
+    },
+    { "id": "s-0004", "idx": 3, "kind": "outline", "bo": "ཀ་ཡི་དོན་དང་།", "breakAfter": "minor" },
+    { "id": "s-0005", "idx": 4, "kind": "outline", "bo": "ཁ་ཡི་དོན་དང་།", "breakAfter": "minor" },
+    {
+      "id": "s-0006",
+      "idx": 5,
+      "kind": "outline",
+      "bo": "ག་ཡི་དོན་བསྟན་པའོ། །",
+      "breakAfter": "major"
+    },
+    {
+      "id": "s-0007",
+      "idx": 6,
+      "kind": "outline",
+      "bo": "དང་པོ་ཀ་ཡི་དོན་ནི།",
+      "breakAfter": "minor",
+      "en": "First, the meaning of ka."
+    },
+    {
+      "id": "s-0008",
+      "idx": 7,
+      "kind": "prose",
+      "bo": "ཀ་ཞེས་པ་ནི་དཔེ་མཚོན་གྱི་ཡི་གེ་དང་པོ་སྟེ། འདི་ནི་ཡིག་ཆ་ངོ་མ་ཞིག་མིན་པར་བཀོལ་སྤྱོད་ཀྱི་ཆེད་དུ་བྲིས་པ་ཙམ་ཡིན་ནོ།",
+      "breakAfter": "minor",
+      "en": "Ka is the first placeholder letter; this is not a real text, only something written for testing."
+    },
+    {
+      "id": "s-0009",
+      "idx": 8,
+      "kind": "prose",
+      "bo": "ཁ་དང་ག་གཉིས་ཀྱང་དེ་བཞིན་དུ་ཤེས་པར་བྱའོ། །",
+      "breakAfter": "major",
+      "en": "Kha and ga should be understood in the same way."
+    },
+    {
+      "id": "s-0010",
+      "idx": 9,
+      "kind": "prose",
+      "bo": "དཔེ་མཚོན་གྱི་ལུང་ལས།",
+      "breakAfter": "minor",
+      "en": "From a sample scripture:"
+    },
+    {
+      "id": "s-0011",
+      "idx": 10,
+      "kind": "verse",
+      "bo": "༼དཔེ།༡༽ ང་ཡི་ཚིག་ནི་དང་པོ་སྟེ། །",
+      "breakAfter": "major",
+      "cite": "དཔེ།༡",
+      "en": "This is the first line."
+    },
+    {
+      "id": "s-0012",
+      "idx": 11,
+      "kind": "verse",
+      "bo": "ཅ་ཡི་ཚིག་ནི་གཉིས་པའོ། །",
+      "breakAfter": "major",
+      "en": "This is the second line."
+    },
+    {
+      "id": "s-0013",
+      "idx": 12,
+      "kind": "prose",
+      "bo": "ཞེས་གསུངས་པ་ལྟར་རོ། །",
+      "breakAfter": "major",
+      "en": "So it is said."
+    },
+    {
+      "id": "s-0014",
+      "idx": 13,
+      "kind": "outline",
+      "bo": "གཉིས་པ་ཁ་ཡི་དོན་ནི།",
+      "breakAfter": "minor",
+      "en": "Second, the meaning of kha."
+    },
+    {
+      "id": "s-0015",
+      "idx": 14,
+      "kind": "prose",
+      "bo": "ཁ་ཞེས་པ་ནི་གཉིས་པ་སྟེ། ཚིག་རིང་པོ་ཞིག་ཇི་ལྟར་སྣང་བ་བལྟ་བའི་ཆེད་དུ་འདིར་ཡི་གེ་མང་པོ་ཞིག་བྲིས་ཡོད་པ་ཡིན་ནོ། །",
+      "breakAfter": "major",
+      "en": "Kha is the second. A longer line is written here so that line wrapping can be seen."
+    },
+    {
+      "id": "s-0016",
+      "idx": 15,
+      "kind": "outline",
+      "bo": "གསུམ་པ་ག་ཡི་དོན་ནི།",
+      "breakAfter": "minor",
+      "en": "Third, the meaning of ga."
+    },
+    {
+      "id": "s-0017",
+      "idx": 16,
+      "kind": "prose",
+      "bo": "ག་ཞེས་པ་ནི་མཐའ་མ་སྟེ། དཔེ་མཚོན་གྱི་ཡིག་ཆ་འདི་ཡང་འདིར་རྫོགས་སོ། །",
+      "breakAfter": "major",
+      "en": "Ga is the last, and this sample text ends here."
+    },
+    {
+      "id": "s-0018",
+      "idx": 17,
+      "kind": "colophon",
+      "bo": "དཔེ་མཚོན་ཡིག་ཆ་རྫོགས་སོ། །",
+      "breakAfter": "major",
+      "en": "The sample text is complete."
+    }
+  ]
+}

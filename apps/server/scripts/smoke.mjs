@@ -99,11 +99,54 @@ const stranger = await connect()
 const badRoom = await join(stranger, 'ZZZZZZ', 'Stranger')
 check('an unknown room code is rejected', badRoom.ok === false, badRoom.error ?? '')
 
+// --- the recovery code actually recovers ----------------------------------
+// A teacher whose browser forgot the room, or who moved to another device, has only
+// this code. If it does not work the class is unrecoverable.
+const verifyHost = (token) =>
+  fetch(`${URL}/api/rooms/${code}/verify-host`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ hostToken: token }),
+  })
+
+check('a wrong recovery code is refused', (await verifyHost('not-the-real-token')).status === 401)
+check('the real recovery code is accepted', (await verifyHost(hostToken)).ok)
+
+const restored = await connect()
+await join(restored, code, 'Teacher on another device')
+const restoredMove = await goto(restored, first, hostToken)
+check('a teacher restored from the recovery code can drive the room',
+  restoredMove.ok === true, restoredMove.error ?? '')
+
+// --- ending the class -----------------------------------------------------
+const close = (socket, token) =>
+  new Promise((resolve) => socket.emit('room:close', { hostToken: token }, resolve))
+
+const studentClose = await close(student, 'not-the-real-token')
+check('a student cannot end the class', studentClose.ok === false, studentClose.error ?? '')
+
+const notified = Promise.race([
+  new Promise((resolve) => student.once('room:closed', () => resolve(true))),
+  new Promise((resolve) => setTimeout(() => resolve(false), 2000)),
+])
+const hostClose = await close(teacher, hostToken)
+check('the host can end the class', hostClose.ok === true, hostClose.error ?? '')
+check('everyone present is told the class ended', (await notified) === true)
+
+const afterwards = await connect()
+const lateToAClosedRoom = await join(afterwards, code, 'Too late')
+check('a closed room accepts no one new', lateToAClosedRoom.ok === false,
+  lateToAClosedRoom.error ?? '')
+check('a closed room reports itself as ended to a returning host',
+  (await verifyHost(hostToken)).status === 410)
+
 for (const { label, pass, detail } of results) {
   console.log(`${pass ? 'PASS' : 'FAIL'}  ${label}${detail ? `  — ${detail}` : ''}`)
 }
 const failed = results.filter((r) => !r.pass).length
 console.log(`\n${results.length - failed}/${results.length} checks passed  (room ${code})`)
 
-for (const socket of [teacher, student, latecomer, stranger]) socket.disconnect()
+for (const socket of [teacher, student, latecomer, stranger, restored, afterwards]) {
+  socket.disconnect()
+}
 process.exit(failed === 0 ? 0 : 1)

@@ -7,7 +7,8 @@ Students join a room with a short code the teacher writes on the whiteboard — 
 accounts. Because Tibetan prose runs as unbroken syllables with no word spaces, losing
 your place is the default experience in these classes; this app removes that.
 
-Full design rationale and phase plan: [`docs/PLAN.md`](docs/PLAN.md).
+Design rationale, the phase plan, and the deployment runbooks are kept outside this
+repository.
 
 ## Scope
 
@@ -24,6 +25,7 @@ Two things deliberately live outside it:
 ## Status
 
 **Phase 1 complete** — rooms, join-by-code, and teacher→student sync.
+Deployment scripts are written but have not yet been run on a server.
 Phase 2 (offline caching, follow-mode, Tibetan webfont) is next.
 
 ## The one rule
@@ -42,32 +44,42 @@ idempotent, and translation layers can be added later without touching the proto
 packages/shared/   types and the socket contract, imported by both client and server
 apps/server/       Fastify + Socket.IO + Postgres
 apps/web/          Vite + React client
-infra/             docker-compose for the dev database
+infra/native/      server install and deploy scripts, systemd unit, Caddy config
+scripts/           dev-db.sh — a local Postgres for development
 texts/             local-only, gitignored — never committed
 ```
 
 ## Running it
 
-**1. A database.** Either Docker:
+**1. A database.**
 
 ```bash
-docker compose -f infra/docker-compose.dev.yml up -d
+./scripts/dev-db.sh start
 ```
 
-or a Postgres you already have — point `DATABASE_URL` at it. Then:
+That creates a Postgres inside the project — port 55432, data in `.pgdata/` — so it
+cannot collide with anything already running on your machine, and `destroy` removes it
+completely. If you would rather use a Postgres you already have, point `DATABASE_URL` at
+it instead. Then:
 
 ```bash
 cp .env.example .env     # set HOST_PASSWORD to something of your own
 ```
 
-**2. A text.** `texts/` starts empty because no corpus is committed. Run the
-`tibetan-segmenter` pipeline and copy its output in:
+**2. A text.**
 
 ```bash
-cp ../tibetan-segmenter/texts/<slug>.json texts/
 npm install
 npm run import -w @wbac/server -- --all
 ```
+
+`texts/sample.json` is committed, so that gives you something to run against
+immediately. It is synthetic — placeholder syllables, not a real work — and exists to
+exercise every kind of segment the reader renders: title, homage, topical outline,
+prose, quoted verse with a citation, and colophon.
+
+No real text is committed. To work with one, produce it with the `tibetan-segmenter`
+pipeline and drop it into `texts/`, which is gitignored apart from the sample.
 
 **3. The app**, in two terminals:
 
@@ -82,6 +94,20 @@ npm run dev -w @wbac/web
 Open http://localhost:5173. Start a class with your `HOST_PASSWORD`, write the room code
 on the board, and students join with it.
 
+## Deploying
+
+The app runs **directly on one small server** — Node, PostgreSQL and Caddy installed
+normally, managed by systemd. Not containers: with one server and one operator, the extra
+layer between a symptom and its cause is paid every time something goes wrong, while the
+consistency containers buy you only pays off across several machines or several people.
+
+The scripts that do it are in [`infra/native/`](infra/native): a one-time installer, a
+deploy script that doubles as the update command, a systemd unit, and a Caddy config
+template. Setting it up is a clone and two commands; updating afterwards is `git pull`
+and one script.
+
+The step-by-step runbooks are internal notes and are not kept in this repository.
+
 ## Authority
 
 Only the room's creator can move the class. The server issues a host token once, at room
@@ -90,7 +116,13 @@ constant time. The teacher-only controls in the client are a convenience — the
 what actually enforces this, so a student with devtools open cannot move the room.
 
 The token lives in the teacher's `localStorage`, which browsers scope per origin. A
-recovery code is shown once at creation for when that browser forgets.
+recovery code is shown once at creation; "Take back control" on the home screen redeems it
+on any device, and it is checked against the server before the client acts on it, so a
+wrong code fails there rather than as silently refused taps mid-class.
+
+Classes end explicitly. The teacher's **End class** button closes the room: everyone
+present is told, and the code stops accepting anyone. Rooms are not left live
+indefinitely — a code that still works weeks later is one a stranger can wander into.
 
 ## Verification
 

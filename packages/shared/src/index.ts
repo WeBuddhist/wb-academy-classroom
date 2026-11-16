@@ -132,6 +132,14 @@ export interface ClientToServerEvents {
     payload: { segmentId: string; hostToken: string },
     ack: (result: { ok: true } | { ok: false; error: string }) => void,
   ) => void
+  /**
+   * End the class. The room stops accepting joins and everyone present is told.
+   * Host-only, checked the same way as `teach:goto`.
+   */
+  'room:close': (
+    payload: { hostToken: string },
+    ack: (result: { ok: true } | { ok: false; error: string }) => void,
+  ) => void
 }
 
 export interface ServerToClientEvents {

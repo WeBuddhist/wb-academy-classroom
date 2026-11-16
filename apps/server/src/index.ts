@@ -12,7 +12,7 @@ import type {
 import { config, warnOnInsecureDefaults } from './config.js'
 import { query, queryOne } from './db.js'
 import { migrate } from './migrate.js'
-import { createRoom, getRoomByCode } from './rooms.js'
+import { createRoom, getRoomByCode, verifyHostToken } from './rooms.js'
 import { attachSockets, type SocketData } from './socket.js'
 
 interface SegmentRow {
@@ -63,9 +63,33 @@ function verifyHostPassword(presented: unknown): boolean {
   return timingSafeEqual(a, b)
 }
 
-const app = Fastify({ logger: { transport: { target: 'pino-pretty' } } })
+// pino-pretty is a development convenience and a real cost under load; in production
+// the logger emits plain JSON for whatever collects it.
+const app = Fastify({
+  logger: config.isProduction ? true : { transport: { target: 'pino-pretty' } },
+})
 
 await app.register(cors, { origin: config.webOrigins })
+
+/**
+ * Check a recovery code before the client acts on it.
+ *
+ * Without this, a teacher restoring a room on a new device would be told they are
+ * teaching, then have every tap silently refused — the failure would surface mid-class
+ * rather than at the moment they can still do something about it.
+ */
+app.post<{ Params: { code: string }; Body: { hostToken?: string } }>(
+  '/api/rooms/:code/verify-host',
+  async (request, reply) => {
+    const room = await getRoomByCode(request.params.code)
+    if (!room) return reply.code(404).send({ error: 'No room with that code.' })
+    if (!room.is_live) return reply.code(410).send({ error: 'That class has ended.' })
+    if (!verifyHostToken(room, request.body?.hostToken)) {
+      return reply.code(401).send({ error: 'That recovery code does not match this room.' })
+    }
+    return { ok: true, textSlug: room.text_slug }
+  },
+)
 
 const io = new Server<
   ClientToServerEvents,

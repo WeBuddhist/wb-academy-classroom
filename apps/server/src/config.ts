@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url'
 const DEFAULT_HOST_PASSWORD = 'change-me'
 
 export const config = {
+  isProduction: process.env.NODE_ENV === 'production',
   port: Number(process.env.PORT ?? 3000),
   databaseUrl: process.env.DATABASE_URL ?? 'postgres://localhost:5432/wbac',
   /** Shared secret that permits creating a room. Not a per-user credential. */

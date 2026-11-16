@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { TextMeta } from '@wbac/shared'
-import { createRoom, listTexts, rememberHostToken } from '../api.js'
+import { createRoom, listTexts, rememberHostToken, verifyHost } from '../api.js'
 
 interface JoinScreenProps {
   initialCode?: string
@@ -14,6 +14,9 @@ export function JoinScreen({ initialCode = '', onEnter }: JoinScreenProps) {
   const [hostPassword, setHostPassword] = useState('')
   const [textSlug, setTextSlug] = useState('')
   const [created, setCreated] = useState<{ code: string; hostToken: string } | null>(null)
+  const [mode, setMode] = useState<'start' | 'resume'>('start')
+  const [resumeCode, setResumeCode] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -41,6 +44,24 @@ export function JoinScreen({ initialCode = '', onEnter }: JoinScreenProps) {
     }
   }
 
+  const resume = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setBusy(true)
+    setError(null)
+    const roomCode = resumeCode.trim().toUpperCase()
+    try {
+      // Checked against the server before it is trusted, so a wrong code fails here
+      // rather than as silently refused taps once the class has started.
+      await verifyHost(roomCode, recoveryCode.trim())
+      rememberHostToken(roomCode, recoveryCode.trim())
+      onEnter(roomCode, name.trim() || 'Teacher')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not restore control.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   if (created) {
     return (
       <div className="panel">
@@ -50,7 +71,7 @@ export function JoinScreen({ initialCode = '', onEnter }: JoinScreenProps) {
         <label className="field">
           <span>
             Recovery code — keep this. It is shown once, and it is what lets you take back
-            control if this browser forgets the room.
+            control if this browser forgets the room or you switch device.
           </span>
           <input readOnly value={created.hostToken} onFocus={(e) => e.currentTarget.select()} />
         </label>
@@ -95,32 +116,84 @@ export function JoinScreen({ initialCode = '', onEnter }: JoinScreenProps) {
         </button>
       </form>
 
-      <form className="panel secondary" onSubmit={start}>
-        <h2>Start a class</h2>
-        <label className="field">
-          <span>Text</span>
-          <select value={textSlug} onChange={(e) => setTextSlug(e.target.value)}>
-            {texts.length === 0 && <option value="">No texts imported yet</option>}
-            {texts.map((text) => (
-              <option key={text.slug} value={text.slug}>
-                {text.titleEn ?? text.titleBo}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>Host password</span>
-          <input
-            type="password"
-            value={hostPassword}
-            onChange={(e) => setHostPassword(e.target.value)}
-            autoComplete="off"
-          />
-        </label>
-        <button type="submit" disabled={busy || !textSlug || !hostPassword}>
-          {busy ? 'Starting…' : 'Start'}
-        </button>
-      </form>
+      {mode === 'start' ? (
+        <form className="panel secondary" onSubmit={start}>
+          <h2>Start a class</h2>
+          <label className="field">
+            <span>Text</span>
+            <select value={textSlug} onChange={(e) => setTextSlug(e.target.value)}>
+              {texts.length === 0 && <option value="">No texts imported yet</option>}
+              {texts.map((text) => (
+                <option key={text.slug} value={text.slug}>
+                  {text.titleEn ?? text.titleBo}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Host password</span>
+            <input
+              type="password"
+              value={hostPassword}
+              onChange={(e) => setHostPassword(e.target.value)}
+              autoComplete="off"
+            />
+          </label>
+          <button type="submit" disabled={busy || !textSlug || !hostPassword}>
+            {busy ? 'Starting…' : 'Start'}
+          </button>
+          <button
+            type="button"
+            className="link spaced"
+            onClick={() => {
+              setMode('resume')
+              setError(null)
+            }}
+          >
+            Already started one? Take back control →
+          </button>
+        </form>
+      ) : (
+        <form className="panel secondary" onSubmit={resume}>
+          <h2>Take back control</h2>
+          <p className="lede">
+            Use the recovery code you were shown when the class was created.
+          </p>
+          <label className="field">
+            <span>Room code</span>
+            <input
+              value={resumeCode}
+              onChange={(e) => setResumeCode(e.target.value.toUpperCase())}
+              placeholder="ABC234"
+              autoCapitalize="characters"
+              autoComplete="off"
+              maxLength={6}
+            />
+          </label>
+          <label className="field">
+            <span>Recovery code</span>
+            <input
+              value={recoveryCode}
+              onChange={(e) => setRecoveryCode(e.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </label>
+          <button type="submit" disabled={busy || !resumeCode.trim() || !recoveryCode.trim()}>
+            {busy ? 'Checking…' : 'Resume teaching'}
+          </button>
+          <button
+            type="button"
+            className="link spaced"
+            onClick={() => {
+              setMode('start')
+              setError(null)
+            }}
+          >
+            ← Start a new class instead
+          </button>
+        </form>
+      )}
 
       {error && <p className="error">{error}</p>}
     </div>
