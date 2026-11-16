@@ -15,15 +15,10 @@ export function App() {
 
   if (!session) {
     return (
-      <main className="shell centred">
-        <header className="masthead">
-          <h1>WB Academy Classroom</h1>
-        </header>
-        <JoinScreen
-          initialCode={initialCode.toUpperCase()}
-          onEnter={(code, displayName) => setSession({ code, displayName })}
-        />
-      </main>
+      <JoinScreen
+        initialCode={initialCode.toUpperCase()}
+        onEnter={(code, displayName) => setSession({ code, displayName })}
+      />
     )
   }
 
@@ -34,6 +29,7 @@ function Classroom({ session, onLeave }: { session: Session; onLeave: () => void
   // Holding the token is what makes this client a teacher. It is checked again on the
   // server for every move; this only decides what the interface offers.
   const hostToken = recallHostToken(session.code)
+  const teaching = Boolean(hostToken)
   const [follow, setFollow] = useState(true)
   const [confirmingEnd, setConfirmingEnd] = useState(false)
   const { connected, state, segments, error, closed, joinRejected, goto, endClass } = useRoom(
@@ -44,45 +40,74 @@ function Classroom({ session, onLeave }: { session: Session; onLeave: () => void
 
   if (closed || joinRejected) {
     return (
-      <main className="shell centred">
-        <div className="panel">
-          <h2>{closed ? 'This class has ended' : 'Could not join'}</h2>
-          <p className="lede">
-            {closed
-              ? hostToken
-                ? 'You ended the class. The room code no longer accepts anyone.'
-                : 'The teacher ended the class.'
-              : (error ?? 'That room is not available.')}
-          </p>
-          <button className="primary" onClick={onLeave}>
-            Back
-          </button>
-        </div>
+      <main className="notice">
+        <h1>{closed ? 'This class has ended' : 'Could not join'}</h1>
+        <p>
+          {closed
+            ? teaching
+              ? 'You ended the class. The room code no longer accepts anyone.'
+              : 'The teacher ended the class.'
+            : (error ?? 'That room is not available.')}
+        </p>
+        <button className="btn btn-secondary" onClick={onLeave}>
+          Back
+        </button>
       </main>
     )
   }
 
+  const count = state?.participantCount ?? 1
+
   return (
-    <main className="shell">
-      <header className="bar">
-        <button className="link" onClick={onLeave}>
-          ← Leave
+    <main className="room">
+      <header className={teaching ? 'topbar teaching' : 'topbar'}>
+        <button className="link leave" onClick={onLeave} aria-label="Leave the class">
+          ←
         </button>
-        <span className="code-chip">{session.code}</span>
-        {hostToken && <span className="role">Teaching</span>}
-        <span className={connected ? 'status ok' : 'status off'}>
-          {connected ? `${state?.participantCount ?? 1} here` : 'Reconnecting…'}
+        <span className="code">{session.code}</span>
+        <span className={connected ? 'meta' : 'meta off'}>
+          {connected ? (
+            <>
+              {count} {count === 1 ? 'person' : 'people'}
+              {teaching && <span className="teaching-label"> · teaching</span>}
+            </>
+          ) : (
+            'Reconnecting…'
+          )}
         </span>
-        <label className="follow">
-          <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} />
-          Follow
-        </label>
-        {hostToken &&
-          // Two steps, because ending a class turns off everyone's screen at once and
-          // the button sits next to controls the teacher uses constantly.
-          (confirmingEnd ? (
+        <span className="spacer" />
+        <button
+          className="pill"
+          aria-pressed={follow}
+          onClick={() => setFollow((value) => !value)}
+          title={follow ? 'Your screen follows the teacher' : 'Scroll freely'}
+        >
+          <span className="dot" />
+          {follow ? 'Following' : 'Follow'}
+        </button>
+      </header>
+
+      {error && !joinRejected && <p className="error">{error}</p>}
+      {teaching && segments.length > 0 && (
+        <p className="teach-hint">Tap a line to bring everyone to it.</p>
+      )}
+
+      <Reader
+        segments={segments}
+        currentSegmentId={state?.currentSegmentId ?? null}
+        canTeach={teaching}
+        follow={follow}
+        onSelect={goto}
+      />
+
+      {/* At the end of the document, not in the toolbar: ending a class blanks every
+          screen at once, and it should not sit beside the controls the teacher uses
+          all lesson. Two steps, for the same reason. */}
+      {teaching && segments.length > 0 && (
+        <footer className="end-class">
+          {confirmingEnd ? (
             <span className="confirm">
-              <button className="danger" onClick={endClass}>
+              <button className="btn btn-danger" onClick={endClass}>
                 End for everyone
               </button>
               <button className="link" onClick={() => setConfirmingEnd(false)}>
@@ -91,23 +116,11 @@ function Classroom({ session, onLeave }: { session: Session; onLeave: () => void
             </span>
           ) : (
             <button className="link" onClick={() => setConfirmingEnd(true)}>
-              End class
+              End this class
             </button>
-          ))}
-      </header>
-
-      {error && <p className="error">{error}</p>}
-      {hostToken && segments.length > 0 && (
-        <p className="hint">Tap a line to move everyone to it.</p>
+          )}
+        </footer>
       )}
-
-      <Reader
-        segments={segments}
-        currentSegmentId={state?.currentSegmentId ?? null}
-        canTeach={Boolean(hostToken)}
-        follow={follow}
-        onSelect={goto}
-      />
     </main>
   )
 }

@@ -3,7 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>WB Academy Classroom</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <title>WeBuddhist Academy — Classroom</title>
+    <meta name="description" content="Follow along with the text your teacher is reading." />
+    <meta name="theme-color" content="#fbf4e6" />
+
+    <!-- The two faces needed before anything is readable. Fetching them in parallel
+         with the JS saves a visible reflow on a slow classroom connection. -->
+    <link rel="preload" href="/fonts/Jomolhari-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/DMSans-Variable.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <div id="root"></div>

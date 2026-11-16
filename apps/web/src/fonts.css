@@ -1,0 +1,52 @@
+/**
+ * WeBuddhist Academy brand typefaces, self-hosted.
+ *
+ * The split is done with `unicode-range`: Latin text falls to DM Sans, and Tibetan
+ * characters fall through to whichever Tibetan face the element asks for. That is why
+ * the Tibetan faces are restricted to U+0F00–0FFF and DM Sans is not restricted at all.
+ *
+ * Two Tibetan faces, deliberately:
+ *   Noto Serif Tibetan — interface text. Even and legible at small sizes.
+ *   Jomolhari          — the texts themselves. Traditional dbu-can, closer to a pecha.
+ *
+ * Both are subset to the Tibetan block and compressed to woff2, which takes Jomolhari
+ * from 2.0 MB to 347 KB and Noto from 719 KB to 148 KB. That matters: thirty phones
+ * pulling fonts over one classroom access point is the worst moment of a session.
+ */
+
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/fonts/DMSans-Variable.woff2') format('woff2-variations');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/fonts/CormorantGaramond-Variable.woff2') format('woff2-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Serif Tibetan';
+  src: url('/fonts/NotoSerifTibetan-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0F00-0FFF;
+}
+
+@font-face {
+  font-family: 'Jomolhari';
+  src: url('/fonts/Jomolhari-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0F00-0FFF;
+  /* Jomolhari draws small for its em size. Scales only this face, so Latin text set
+     alongside it is unaffected. Taken from the brand's own declaration. */
+  size-adjust: 115%;
+}
