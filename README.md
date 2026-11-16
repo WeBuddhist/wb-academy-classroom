@@ -81,7 +81,27 @@ prose, quoted verse with a citation, and colophon.
 No real text is committed. To work with one, produce it with the `tibetan-segmenter`
 pipeline and drop it into `texts/`, which is gitignored apart from the sample.
 
-**3. The app**, in two terminals:
+**3. The app.**
+
+```bash
+./scripts/dev.sh
+```
+
+That starts the database if it is not already up, then the API and the client together,
+and prints the address once the API is actually answering. Ctrl+C stops both servers;
+the database is left running, since it holds your imported texts.
+
+To stop everything, including the database:
+
+```bash
+./scripts/stop.sh
+```
+
+Useful when Ctrl+C never happened — a closed terminal, a crashed shell — and something
+is still holding the ports. `--keep-db` leaves Postgres up. Stopping it loses nothing;
+the data stays in `.pgdata/`.
+
+To run them separately instead — useful when you want the two logs apart:
 
 ```bash
 npm run dev -w @wbac/server
@@ -93,6 +113,9 @@ npm run dev -w @wbac/web
 
 Open http://localhost:5173. Start a class with your `HOST_PASSWORD`, write the room code
 on the board, and students join with it.
+
+For a second participant on the same machine, use a different browser or a private
+window — two tabs in one browser share the host token, so both become teachers.
 
 ## Deploying
 
